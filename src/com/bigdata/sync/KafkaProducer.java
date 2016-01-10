@@ -5,18 +5,19 @@ import java.util.Properties;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
+
+import com.bigdata.DataClass.ConfData;
 import com.bigdata.DataClass.JNData;
 
 public class KafkaProducer {
 	
-	public static String brokerlist = "127.0.0.1:9092";
-	public static String topic = "p";
+	public static String brokerlist = ConfData.readProperties().brokerlist;
+	public static String topic = ConfData.readProperties().topic;
 	
 	public static void producer(String key, JNData inData) {
 		
-		System.out.println("producer key===>" + key);
-		System.out.println("producer default1===>" + inData.getDefault1());
-		
+		System.out.println("@@@@KAFKA PRODUCER KEY===>" + key);
+		System.out.println("@@@@KAFKA PRODUCER DEFAULT1===>" + inData.getDefault1());
 		
 		Properties props = new Properties();
         props.put("metadata.broker.list", brokerlist);

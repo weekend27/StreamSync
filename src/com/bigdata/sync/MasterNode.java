@@ -8,26 +8,24 @@ import com.bigdata.DataClass.*;
 import com.cetc.remote.Agent;
 import com.cetc.remote.AliasServer;
 
-public class ControlMessage implements Master  {
+public class MasterNode implements Master  {
 	
 	LinkedList<MasterTable> mlist = new LinkedList<MasterTable>();
-	public static final long T = ConfData.readProperties().allNodesWaitTime;			// SLEEP Threshold is 5 seconds
-	private String[] servers = {"radar.slave1"};   //, "radar.slave2"
-	private volatile Boolean flag = false;
-	
+	public static final long T = ConfData.readProperties().allNodesWaitTime;			// SLEEP Threshold
+	private String[] servers = ConfData.readProperties().servers;   // add slaves here
+	private volatile Boolean signSleep = false;
 	
 	public void processMsgFirst(short default1) {		// message: FIRST
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
 		long currTime;
 		long gapTime;
-		MasterTable tempMT = new MasterTable();
 		int tempSN;
 		int tempIndex;
 		boolean signAdd = false;
 		
-		
 		if (mlist.isEmpty()) {
 			currTime = new Date().getTime();
+			MasterTable tempMT = new MasterTable();
 			tempMT.setDefault1(default1);
 			tempMT.setRecvTime(currTime);
 			tempMT.setStartNum(1);
@@ -37,12 +35,12 @@ public class ControlMessage implements Master  {
 			sleep(default1, T);		// trigger the sleep process
 		} else {
 			while (lit.hasNext()) {
+				MasterTable tempMT = new MasterTable();
 				tempMT = lit.next();
 				tempIndex = mlist.indexOf(tempMT);
 				if (default1 == tempMT.getDefault1()) {
 					currTime = new Date().getTime();
 					gapTime = currTime - tempMT.getRecvTime();
-					System.out.println("***New gapTime = " + gapTime);
 					if (gapTime >= T) {
 						save(default1);
 						System.out.println("MASTER SAVE===OVERTIME--->" + default1);
@@ -62,6 +60,7 @@ public class ControlMessage implements Master  {
 		}
 		if (signAdd == false) {
 			currTime = new Date().getTime();
+			MasterTable tempMT = new MasterTable();
 			tempMT.setDefault1(default1);
 			tempMT.setRecvTime(currTime);
 			tempMT.setStartNum(1);
@@ -76,11 +75,12 @@ public class ControlMessage implements Master  {
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
 		long currTime;
 		long gapTime;
-		MasterTable tempMT = new MasterTable();
 		int tempFN;
 		int tempIndex;
 		
+		
 		while (lit.hasNext()) {
+			MasterTable tempMT = new MasterTable();
 			tempMT = lit.next();
 			tempIndex = mlist.indexOf(tempMT);
 			if (default1 == tempMT.getDefault1()) {
@@ -114,11 +114,11 @@ public class ControlMessage implements Master  {
 		long currTime;
 		long gapTime;
 		long sleepTime;
-		MasterTable tempMT = new MasterTable();
 		short retDefault1;
 		boolean signAwake = false;
 		
 		while (lit.hasNext()) {
+			MasterTable tempMT = new MasterTable();
 			tempMT = lit.next();
 			if (default1 == tempMT.getDefault1()) {
 				save(default1);
@@ -140,9 +140,9 @@ public class ControlMessage implements Master  {
 	public void sleep(final short default1, final long sleepTime) {
 		
 		synchronized(this) {
-			if (flag)
+			if (signSleep)
 				return;
-			flag = true;
+			signSleep = true;
 		}
 		System.out.printf("Master receives SLEEP(%d) for (%d) milliseconds.\n", default1, sleepTime);
 		new Thread(new Runnable() {
@@ -153,7 +153,7 @@ public class ControlMessage implements Master  {
 				} catch (InterruptedException e) {
 				} finally {
 					MasterServer.INSTANCE.remote("radar.master").data().processMsgAwake(default1);
-					flag = false;
+					signSleep = false;
 				}
 			}
 		}).start();
@@ -168,10 +168,10 @@ public class ControlMessage implements Master  {
 	
 }
 
-class MasterAgent extends Agent<Master, ControlMessage> {
+class MasterAgent extends Agent<Master, MasterNode> {
 	public static final MasterAgent INSTANCE = new MasterAgent();
 	private MasterAgent() {
-		super(Master.class, ControlMessage.class);
+		super(Master.class, MasterNode.class);
 	}
 }
 

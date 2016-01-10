@@ -11,7 +11,7 @@ import com.bigdata.DataClass.Package;
 import com.cetc.remote.Agent;
 import com.cetc.remote.AliasServer;
 
-public class ServerMessage implements Slave {
+public class SlaveNode implements Slave {
 	
 	LinkedList<Package> packageList = new LinkedList<Package>();
 	Set<Short> isDeletedSet = new HashSet<Short>();
@@ -31,7 +31,7 @@ public class ServerMessage implements Slave {
 			String key = null;
 			Package tempPackage = null;
 			
-			System.out.println("Server receives SAVE message, Default1--->" + default1);
+			System.out.println("SAVE DEFAULT1--->" + default1);
 			
 			if (!packageList.isEmpty()) {    		// find the target data
 				while (lit.hasNext()) {
@@ -51,8 +51,8 @@ public class ServerMessage implements Slave {
 				if (tempDataArray[i] != null) {
 					key = (default1 + "") + "|" + (tempCount + "");
 					if (key != null) {
-						System.out.println("sendDataToKafka: key--->" + key);
-						System.out.println("sendDataToKafka: default1--->" + tempDataArray[i].getDefault1());
+						System.out.println("####SEND TO KAFKA: KEY--->" + key);
+						System.out.println("####SEND TO KAFKA: DEFAULT1--->" + tempDataArray[i].getDefault1());
 						KafkaProducer.producer(key, tempDataArray[i]);
 					}
 				}
@@ -75,7 +75,6 @@ public class ServerMessage implements Slave {
 			System.out.println("<<<<<<<<<<<<<isDeletedSet.size() = " + isDeletedSet.size());
 			
 			if (packageList.isEmpty()) {			// if the packageList is empty, add inData to packageList
-				System.out.println("******************");
 				Package tempPackage = new Package();
 				JNData[] tempDataArray = new JNData[ARRAYLEN];
 				tempDataArray = tempPackage.getDataArray();
@@ -99,7 +98,6 @@ public class ServerMessage implements Slave {
 					tempDataArray = tempPackage.getDataArray();
 					tempDefault1 = tempPackage.getDefault1();
 					if (tempDefault1 == inData.getDefault1()) {		// find the inserting position before traversal is over
-						System.out.println("===================");
 						tempIndex = packageList.indexOf(tempPackage);		// record the inserting position
 						tempCount = tempPackage.getCount();
 						tempDataArray[tempCount] = inData;
@@ -115,7 +113,6 @@ public class ServerMessage implements Slave {
 					}
 				}
 				if (signAdd == false) {			// if there is no position to insert inData, insert it to the tail of packageList
-					System.out.println("###############");
 					Package tempPackage = new Package();
 					JNData[] tempDataArray = new JNData[ARRAYLEN];
 					tempDataArray = tempPackage.getDataArray();
@@ -135,23 +132,23 @@ public class ServerMessage implements Slave {
 	}
 	
 	public void first(short default1) {				// send first message to control node
-		System.out.println("first default1 = " + default1);
+		System.out.println("~~~~first default1 = " + default1);
 		MasterServer.INSTANCE.remote("radar.master").data().processMsgFirst(default1);
 	}
 	
 	public void last(short default1) {			// send last message to control node
-		System.out.println("last default1 = " + default1);
+		System.out.println("^^^^last default1 = " + default1);
 		MasterServer.INSTANCE.remote("radar.master").data().processMsgLast(default1);
 	}
 
 }
 
 
-class SlaveAgent extends Agent<Slave, ServerMessage> {
-	public static final ServerMessage server = new ServerMessage();
+class SlaveAgent extends Agent<Slave, SlaveNode> {
+	public static final SlaveNode server = new SlaveNode();
 	public static final SlaveAgent INSTANCE = new SlaveAgent();
 	private SlaveAgent() {
-		super(Slave.class, ServerMessage.class, server);
+		super(Slave.class, SlaveNode.class, server);
 	}
 }
 
@@ -161,4 +158,3 @@ class SlaveServer extends AliasServer<Slave> {
 		super(Slave.class);
 	}
 }		
-

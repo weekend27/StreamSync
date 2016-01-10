@@ -11,8 +11,10 @@ public class Test {
 	static Random r = new Random();
 	public static void main(String[] args) throws InterruptedException {     // run control first, then run server1, server2, server3 ......
 //		control();
-		server("radar.slave1");
-//		server("radar.slave2");
+//		server("radar.slave1");
+		server("radar.slave2");
+//		server("radar.slave3");
+//		server("radar.slave4");
 	}
 	
 	private static void control() {
@@ -24,7 +26,7 @@ public class Test {
 		
 		BDPSystem.init(new BDPSystem.SystemConfig(key));
 		SlaveAgent.INSTANCE.local().data();
-		ServerMessage s = SlaveAgent.server;
+		SlaveNode s = SlaveAgent.server;
 		long PackageNO = Math.abs(r.nextLong());												/*数据包编号*/
 		int FrameNo = Math.abs(r.nextInt());														/*帧号*/
 		int TBeamID;																								/*发射波位编号*/
@@ -40,7 +42,7 @@ public class Test {
 		short Default1;																							/*预留字段1: increasing send number*/
 		int Default2;																								/*预留字段2: 7 packages at most*/
 		
-		for (short i = 1; i <= 20; i++) {
+		for (short i = 1; i <= 30; i++) {
 			int total = r.nextInt(7) + 1;
 //			int total = 7;
 			for (int j = 1; j <= total; j++) {
