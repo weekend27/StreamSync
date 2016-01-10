@@ -12,10 +12,11 @@ public class ControlMessage implements Master  {
 	
 	LinkedList<MasterTable> mlist = new LinkedList<MasterTable>();
 	public static final long T = ConfData.readProperties().allNodesWaitTime;			// SLEEP Threshold is 5 seconds
-	private String[] servers = {"radar.slave1", "radar.slave2"};   //, "radar.slave2"
+	private String[] servers = {"radar.slave1"};   //, "radar.slave2"
+	private volatile Boolean flag = false;
 	
 	
-	public void processMsgFirst(short default1, int default2) {		// message: FIRST
+	public void processMsgFirst(short default1) {		// message: FIRST
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
 		long currTime;
 		long gapTime;
@@ -23,6 +24,7 @@ public class ControlMessage implements Master  {
 		int tempSN;
 		int tempIndex;
 		boolean signAdd = false;
+		
 		
 		if (mlist.isEmpty()) {
 			currTime = new Date().getTime();
@@ -40,6 +42,7 @@ public class ControlMessage implements Master  {
 				if (default1 == tempMT.getDefault1()) {
 					currTime = new Date().getTime();
 					gapTime = currTime - tempMT.getRecvTime();
+					System.out.println("***New gapTime = " + gapTime);
 					if (gapTime >= T) {
 						save(default1);
 						System.out.println("MASTER SAVE===OVERTIME--->" + default1);
@@ -65,6 +68,7 @@ public class ControlMessage implements Master  {
 			tempMT.setFinishNum(0);
 			mlist.add(tempMT);
 			signAdd = true;
+			sleep(default1, T);		// trigger the sleep process
 		}
 	}
 
@@ -104,12 +108,6 @@ public class ControlMessage implements Master  {
 			}
 		}
 	}
-
-	private void save(short id) {
-		for (String server : servers) {
-			SlaveServer.INSTANCE.remote(server).data().save(id);
-		}
-	}
 	
 	public void processMsgAwake(short default1) {		// message: AWAKE
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
@@ -139,12 +137,35 @@ public class ControlMessage implements Master  {
 		}
 	}
 	
-	public void sleep(short default1, long sleepTime) {
-		System.out.println("SLEEP DEFAULT1--->" + default1);
-		System.out.println("SLEEP TIME--->" + sleepTime);
-		SleepServer.INSTANCE.remote("radar.master").data().sleep(default1, sleepTime);
+	public void sleep(final short default1, final long sleepTime) {
+		
+		synchronized(this) {
+			if (flag)
+				return;
+			flag = true;
+		}
+		System.out.printf("Master receives SLEEP(%d) for (%d) milliseconds.\n", default1, sleepTime);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException e) {
+				} finally {
+					MasterServer.INSTANCE.remote("radar.master").data().processMsgAwake(default1);
+					flag = false;
+				}
+			}
+		}).start();
+		
 	}
 
+	private void save(short id) {
+		for (String server : servers) {
+			SlaveServer.INSTANCE.remote(server).data().save(id);
+		}
+	}
+	
 }
 
 class MasterAgent extends Agent<Master, ControlMessage> {

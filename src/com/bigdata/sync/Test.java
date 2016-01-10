@@ -11,15 +11,13 @@ public class Test {
 	static Random r = new Random();
 	public static void main(String[] args) throws InterruptedException {     // run control first, then run server1, server2, server3 ......
 //		control();
-//		server("radar.slave1");
-		server("radar.slave2");
+		server("radar.slave1");
+//		server("radar.slave2");
 	}
-	
 	
 	private static void control() {
 		BDPSystem.init(new BDPSystem.SystemConfig("radar.master"));
 		MasterAgent.INSTANCE.local().data();
-		SleepAgent.INSTANCE.local().data();
 	}
 	
 	private static void server(String key) throws InterruptedException {

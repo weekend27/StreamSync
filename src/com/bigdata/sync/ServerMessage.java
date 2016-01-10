@@ -86,7 +86,7 @@ public class ServerMessage implements Slave {
 				tempPackage.setDataArray(tempDataArray);
 				packageList.add(tempPackage);
 				signAdd = true;
-				first(inData.getDefault1(), inData.getDefault2());			// send first message to control node
+				first(inData.getDefault1());			// send first message to control node
 				if (inData.getDefault2() == 1) {			// check if it triggers the sending condition, if so, send last message
 					last(inData.getDefault1());
 				}
@@ -125,7 +125,7 @@ public class ServerMessage implements Slave {
 					tempPackage.setDataArray(tempDataArray);
 					packageList.add(tempPackage);
 					signAdd = true;
-					first(inData.getDefault1(), inData.getDefault2());    // send first message to control node
+					first(inData.getDefault1());    // send first message to control node
 					if (inData.getDefault2() == 1) {    // check if it triggers the sending condition, if so, send last message
 						last(inData.getDefault1());
 					}
@@ -134,10 +134,9 @@ public class ServerMessage implements Slave {
 		}
 	}
 	
-	public void first(short default1, int default2) {				// send first message to control node
+	public void first(short default1) {				// send first message to control node
 		System.out.println("first default1 = " + default1);
-		System.out.println("first default2 = " + default2);
-		MasterServer.INSTANCE.remote("radar.master").data().processMsgFirst(default1, default2);
+		MasterServer.INSTANCE.remote("radar.master").data().processMsgFirst(default1);
 	}
 	
 	public void last(short default1) {			// send last message to control node
