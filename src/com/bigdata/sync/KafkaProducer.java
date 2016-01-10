@@ -21,7 +21,7 @@ public class KafkaProducer {
 		
 		Properties props = new Properties();
         props.put("metadata.broker.list", brokerlist);
-        props.put( "serializer.class", "com.bigdata.kafka.DataKafkaKryoEncoder");			// need to update
+        props.put("serializer.class", "com.bigdata.kafka.DataKafkaKryoEncoder");			// need to update
         props.put("partitioner.class", "com.bigdata.kafka.SimplePartitioner");				// need to update
         props.put("request.required.acks", "1");
         
