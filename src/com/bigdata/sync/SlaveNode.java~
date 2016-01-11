@@ -200,7 +200,7 @@ public class SlaveNode implements Slave {
 	}
 	
 	public static JNData preProcessData(RFNodeData preData){
-	    Random r = new Random();
+		Random r = new Random();
 	    JNData jnData = new JNData();
 	    JamSignalData jam = new JamSignalData();
 	    NonJamRTSData nonJam = new NonJamRTSData();
