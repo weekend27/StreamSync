@@ -16,8 +16,8 @@ public class KafkaProducer {
 	
 	public static void producer(String key, JNData inData) {
 		
-		System.out.println("@@@@KAFKA PRODUCER KEY===>" + key);
-		System.out.println("@@@@KAFKA PRODUCER DEFAULT1===>" + inData.getDefault1());
+		System.out.println("#######Kafka receives: Key===>" + key);
+		System.out.println("#######Kafka receives: Default1===>" + inData.getDefault1());
 		
 		Properties props = new Properties();
         props.put("metadata.broker.list", brokerlist);
