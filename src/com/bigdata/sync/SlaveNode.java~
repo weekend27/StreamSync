@@ -273,4 +273,3 @@ class SlaveServer extends AliasServer<Slave> {
 		super(Slave.class);
 	}
 }		
-
