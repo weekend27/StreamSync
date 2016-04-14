@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import com.bigdata.DataClass.*;
-import com.cetc.remote.Agent;
-import com.cetc.remote.AliasServer;
+import com.cetc.remote.*;
+
+import dataClass.ConfData;
+import dataClass.MasterTable;
 
 public class MasterNode implements Master  {
 	
@@ -43,7 +44,8 @@ public class MasterNode implements Master  {
 					gapTime = currTime - tempMT.getRecvTime();
 					if (gapTime >= T) {
 						save(default1);
-						System.out.println("MASTER SAVE===OVERTIME--->" + default1);
+						//System.out.println("MASTER SAVE===OVERTIME===SIZE--->" + mlist.size() );
+						System.out.println("[OVERTIME] MASTER SAVE===OVERTIME--->" + default1);
 						mlist.remove(tempMT);
 						signAdd = true;
 						break;
@@ -88,7 +90,8 @@ public class MasterNode implements Master  {
 				gapTime = currTime - tempMT.getRecvTime();
 				if (gapTime >= T) {
 					save(default1);
-					System.out.println("MASTER SAVE===OVERTIME--->" + default1);
+					//System.out.println("MASTER SAVE===OVERTIME===SIZE--->" + mlist.size() );
+					System.out.println("[OVERTIME] MASTER SAVE===OVERTIME--->" + default1);
 					mlist.remove(tempMT);
 					break;
 				} else {
@@ -96,7 +99,8 @@ public class MasterNode implements Master  {
 					tempFN++;
 					if (tempFN == servers.length) {			// all servers send LAST message
 						save(default1);
-						System.out.println("MASTER SAVE===FINISH--->" + default1);
+						//System.out.println("MASTER SAVE===FINISH===SIZE--->" + mlist.size() );
+						System.out.println("[FINISH] MASTER SAVE===FINISH--->" + default1);
 						mlist.remove(tempMT);
 						break;
 					} else {
@@ -122,7 +126,8 @@ public class MasterNode implements Master  {
 			tempMT = lit.next();
 			if (default1 == tempMT.getDefault1()) {
 				save(default1);
-				System.out.println("MASTER SAVE===AWAKE--->" + default1);
+				//System.out.println("MASTER SAVE===AWAKE===SIZE--->" + mlist.size() );
+				System.out.println("[AWAKE] MASTER SAVE===AWAKE--->" + default1);
 				mlist.remove(tempMT);
 				signAwake = true;
 				break;
@@ -144,7 +149,7 @@ public class MasterNode implements Master  {
 				return;
 			signSleep = true;
 		}
-		System.out.printf("Master receives SLEEP(%d) for (%d) milliseconds.\n", default1, sleepTime);
+		System.out.printf("[SLEEP] Master receives SLEEP(%d) for (%d) milliseconds.\n", default1, sleepTime);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -152,7 +157,7 @@ public class MasterNode implements Master  {
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 				} finally {
-					MasterServer.INSTANCE.remote("radar.master").data().processMsgAwake(default1);
+					MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgAwake(default1);
 					signSleep = false;
 				}
 			}
@@ -168,14 +173,14 @@ public class MasterNode implements Master  {
 	
 }
 
-class MasterAgent extends Agent<Master, MasterNode> {
+class MasterAgent extends BaseAgent<Master, MasterNode> {
 	public static final MasterAgent INSTANCE = new MasterAgent();
 	private MasterAgent() {
 		super(Master.class, MasterNode.class);
 	}
 }
 
-class MasterServer extends AliasServer<Master> {
+class MasterServer extends BaseServer<Master> {
 	public static final MasterServer INSTANCE = new MasterServer();
 	private MasterServer() {
 		super(Master.class);
