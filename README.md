@@ -1,4 +1,4 @@
-Data-Synchronization
+StreamSync
 ======================
 一个简单的分布式流式数据缓冲同步框架。
 
