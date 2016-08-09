@@ -8,7 +8,7 @@ StreamSync
 1. 整个系统是典型的Master/Slave架构，分为消息控制端以及数据同步端，其中，数据同步端有多个，消息控制端有一个。
    其中消息控制端并不处理缓冲数据，只负责保存各个Slave节点的同步信息，以及根据数据到达情况以及是否超时情况向各个Slave节点下达数据发放的命令。
    各个Slave节点负责接收上游的数据，并发送数据初次到达服务器以及数据完全到达服务器的消息给Master节点，并根据Master节点返回的消息作进一步的处理。
-2. Master与Slave节点之间的通信使用了异步通信框架akka。
+2. Master与Slave节点之间的通信使用了异步通信框架Akka。
 3. 缓冲同步后的数据最终流向了Kafka消息队列。
 ```
 
@@ -43,7 +43,7 @@ StreamSync
 (3) 接消息流程
 >>>传入参数Default1(short)
 添加Default1到isDeletedSet，标记该Default1已删除
-遍历packageList，找到Default1对应的Package，发送到Kafaka，然后删除
+遍历packageList，找到Default1对应的Package，发送到Kafka，然后删除
 ```
 
 #### 4. Master节点
@@ -66,7 +66,7 @@ StreamSync
 遍历mlist，找到Default1
 	判断是否超时(currTime - recvTime > T)，如果是，则发送save(Default1)，然后删除
 	否则，更新finishNum
-		如果finishNum == servers的数量，集齐7个即可召唤神龙，则发送save(Default1)，然后删除
+		如果finishNum == servers的数量N，集齐N个即可召唤神龙，则发送save(Default1)，然后删除
 		否则，只更新finishNum
 
 (4) 接唤醒消息流程processMsgAwake

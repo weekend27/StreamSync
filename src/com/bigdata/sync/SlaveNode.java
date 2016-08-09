@@ -21,27 +21,27 @@ import preprocess.RTSData;
 
 @SuppressWarnings("unused")
 public class SlaveNode implements Slave, HandleData {
-	
+
 	LinkedList<Package> packageList = new LinkedList<Package>();
 	Set<Short> isDeletedSet = new HashSet<Short>();
 	public static final int ARRAYLEN = ConfData.readProperties().arrayLen;
-	
+
 	public void save(short default1) {
-		
+
 		//System.out.println("**************SAVE START**************");
-		
+
 		synchronized(this) {
-			
+
 			isDeletedSet.add(default1);
-			
+
 			ListIterator<Package> lit = (ListIterator<Package>) packageList.iterator();
 			int tempCount;
 			int len;
 			String key = null;
 			Package tempPackage = null;
-			
+
 			System.out.println("[SAVE] save Default1--->" + default1);
-			
+
 			if (!packageList.isEmpty()) {    		// find the target data
 				while (lit.hasNext()) {
 					tempPackage = lit.next();
@@ -51,7 +51,7 @@ public class SlaveNode implements Slave, HandleData {
 					}
 				}
 			}
-			
+
 			// send data to Kafka
 			if (tempPackage != null) {
 				JNData[] tempDataArray = tempPackage.DataArray;
@@ -81,28 +81,28 @@ public class SlaveNode implements Slave, HandleData {
 						}
 					}
 				}
-			}			
+			}
 		}
 		//System.out.println("**************SAVE END**************");
 	}
-	
+
 	public synchronized void processData(JNData inData) {
 		ListIterator<Package> lit = (ListIterator<Package>) packageList.iterator();
 		short tempDefault1;
 		int tempCount;
 		boolean signAdd = false;
 		int tempIndex;
-		
+
 		//System.out.println("OUTSIDE");
 		//System.out.println("<<<<<<<<<<<<<packageList.size() = " + packageList.size());
 		System.out.println("[SYNC] synchronization process: default1 = " + inData.Default1);
 		System.out.println("[SYNC] synchronization process: default2 = " + inData.Default2);
-		
+
 		if (isDeletedSet.isEmpty() || !isDeletedSet.contains(inData.Default1)) {    // make sure that this default1 has not been deleted before
-			
+
 			//System.out.println("INSIDE");
 			//System.out.println("<<<<<<<<<<<<<isDeletedSet.size() = " + isDeletedSet.size());
-			
+
 			if (packageList.isEmpty()) {			// if the packageList is empty, add inData to packageList
 				Package tempPackage = new Package();
 				JNData[] tempDataArray = new JNData[ARRAYLEN];
@@ -163,26 +163,26 @@ public class SlaveNode implements Slave, HandleData {
 			}
 		}
 	}
-	
+
 
 	public void handleData(final dataClass.RFNodeData nodeData) {
 		// record raw data
 		if(nodeData.TBeamID == 1) {
 			writeData(nodeData);
 		}
-		
+
 		processData(SlaveNode.preProcessData(nodeData));
-		
+
 		/*new Thread(new Runnable() {
 			@Override
 			public void run() {
 				processData(SlaveNode.preProcessData(nodeData));
 			}
 		}).start();*/
-		
+
 	}
-	
-	
+
+
 	public static void deleteFile() {
 		File file = new File("BeforePrepData");
 		if (file.isDirectory()) {
@@ -192,11 +192,11 @@ public class SlaveNode implements Slave, HandleData {
 			}
 		}
 	}
-	
+
 	public static void writeData(RFNodeData data) {
 		File file;
 		FileWriter fw;
-		
+
 		try {
 			file = new File(System.getProperty("user.home" ) + "/BeforePrepData/");
 			if (!file.exists() || !file.isDirectory()) {
@@ -229,10 +229,10 @@ public class SlaveNode implements Slave, HandleData {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	
+
+
 	@SuppressWarnings("static-access")
 	public static JNData preProcessData(RFNodeData nodeData){
 		MiddleClass middle = new MiddleClass();
@@ -250,9 +250,9 @@ public class SlaveNode implements Slave, HandleData {
 		middle.setDefault2(nodeData.Default2);
 		middle.settotalSize(nodeData.totalSize);
 		middle.setwaveData(nodeData.waveData);
-		
+
 		middle.execProcess();
-		
+
 		JNData result = new JNData();
 		result.PackageNO = middle.getPackageNO();
 		result.FrameNo =  middle.getFrameNo();
@@ -270,20 +270,20 @@ public class SlaveNode implements Slave, HandleData {
 		result.totalSize2 = middle.gettotalSize2();
 		result.waveData1 = middle.getwaveData1();
 		result.waveData2 = middle.getwaveData2();
-		
+
 	    return result;
 	}
-	
+
 	public void first(short default1) {				// send first message to control node
 		System.out.println("[FRST] first default1 = " + default1);
 		MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgFirst(default1);
 	}
-	
+
 	public void last(short default1) {			// send last message to control node
 		System.out.println("[LAST] last default1 = " + default1);
 		MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgLast(default1);
 	}
-	
+
 }
 
 class SlaveAgent extends BaseAgent<Slave, SlaveNode> {
@@ -306,5 +306,4 @@ class SlaveServer extends BaseServer<Slave> {
 	private SlaveServer() {
 		super(Slave.class);
 	}
-}		
-
+}
