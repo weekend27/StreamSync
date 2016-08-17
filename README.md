@@ -83,8 +83,8 @@ StreamSync
 #### 5. 配置文件
 
 ```
-akka通信配置文件为：src/akka.conf
-sync同步配置文件为：src/sync.properties
+akka通信配置文件为：src/config/akka.conf
+sync同步配置文件为：src/config/sync.properties
 ```
 
 #### 6. Contact me?
