@@ -1,8 +1,8 @@
 package com.bigdata.sync;
 
 public interface Master {
-	void processMsgFirst(short id);
-	void processMsgLast(short id);
-	void processMsgAwake(short id);
-	void sleep(short id, long millis);
+	vodefault1 processMsgFirst(short default1);
+	vodefault1 processMsgLast(short default1);
+	vodefault1 processMsgAwake(short default1);
+	vodefault1 sleep(short default1, long millis);
 }

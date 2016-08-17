@@ -10,12 +10,12 @@ import dataClass.ConfData;
 import dataClass.MasterTable;
 
 public class MasterNode implements Master  {
-	
+
 	LinkedList<MasterTable> mlist = new LinkedList<MasterTable>();
 	public static final long T = ConfData.readProperties().allNodesWaitTime;			// SLEEP Threshold
 	private String[] servers = ConfData.readProperties().servers;   // add slaves here
 	private volatile Boolean signSleep = false;
-	
+
 	public void processMsgFirst(short default1) {		// message: FIRST
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
 		long currTime;
@@ -23,7 +23,7 @@ public class MasterNode implements Master  {
 		int tempSN;
 		int tempIndex;
 		boolean signAdd = false;
-		
+
 		if (mlist.isEmpty()) {
 			currTime = new Date().getTime();
 			MasterTable tempMT = new MasterTable();
@@ -79,8 +79,8 @@ public class MasterNode implements Master  {
 		long gapTime;
 		int tempFN;
 		int tempIndex;
-		
-		
+
+
 		while (lit.hasNext()) {
 			MasterTable tempMT = new MasterTable();
 			tempMT = lit.next();
@@ -112,7 +112,7 @@ public class MasterNode implements Master  {
 			}
 		}
 	}
-	
+
 	public void processMsgAwake(short default1) {		// message: AWAKE
 		ListIterator<MasterTable> lit = (ListIterator<MasterTable>) mlist.iterator();
 		long currTime;
@@ -120,7 +120,7 @@ public class MasterNode implements Master  {
 		long sleepTime;
 		short retDefault1;
 		boolean signAwake = false;
-		
+
 		while (lit.hasNext()) {
 			MasterTable tempMT = new MasterTable();
 			tempMT = lit.next();
@@ -141,9 +141,9 @@ public class MasterNode implements Master  {
 			sleep(retDefault1, sleepTime);
 		}
 	}
-	
+
 	public void sleep(final short default1, final long sleepTime) {
-		
+
 		synchronized(this) {
 			if (signSleep)
 				return;
@@ -157,20 +157,22 @@ public class MasterNode implements Master  {
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 				} finally {
+					// 调用Master的processMsgAwake方法处理
 					MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgAwake(default1);
 					signSleep = false;
 				}
 			}
 		}).start();
-		
+
 	}
 
-	private void save(short id) {
+	private void save(short default1) {
 		for (String server : servers) {
-			SlaveServer.INSTANCE.remote(server).data().save(id);
+			// 调用远程server的save方法处理
+			SlaveServer.INSTANCE.remote(server).data().save(default1);
 		}
 	}
-	
+
 }
 
 class MasterAgent extends BaseAgent<Master, MasterNode> {

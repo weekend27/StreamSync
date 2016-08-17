@@ -8,10 +8,11 @@ import com.typesafe.config.*;
 import dataClass.ConfData;
 
 public class Test {
-	
+
 	public static void main(String[] args) throws InterruptedException, UnknownHostException {
 		ConfData conf = ConfData.readProperties();
 		String myip = InetAddress.getLocalHost().getHostAddress();
+		// 根据IP确定身份
 		if (myip.equals(conf.master))
 			control();
 		else
@@ -30,8 +31,8 @@ public class Test {
 	}
 
 	private static Config getConfig() {
-		//ConfData cd = new ConfData().readProperties().akkaPath;
 		System.out.println(ConfData.readProperties().akkaPath);
+		// 解析config/akka.conf文件
 		return ConfigFactory.parseFile(new File(ConfData.readProperties().akkaPath));
 	}
 }

@@ -276,11 +276,13 @@ public class SlaveNode implements Slave, HandleData {
 
 	public void first(short default1) {				// send first message to control node
 		System.out.println("[FRST] first default1 = " + default1);
+		// 调用远程Master的处理方法processMsgFirst
 		MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgFirst(default1);
 	}
 
 	public void last(short default1) {			// send last message to control node
 		System.out.println("[LAST] last default1 = " + default1);
+		// 调用远程Master的处理方法processMsgFirst
 		MasterServer.INSTANCE.remote(ConfData.readProperties().master).data().processMsgLast(default1);
 	}
 
